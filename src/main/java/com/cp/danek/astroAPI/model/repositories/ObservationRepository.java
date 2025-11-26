@@ -49,4 +49,6 @@ public interface ObservationRepository extends JpaRepository<Observation, Long> 
     Long countConflictingObservations(@Param("telescopeId") Long telescopeId,
                                       @Param("start") LocalDateTime start,
                                       @Param("end") LocalDateTime end);
+
+    List<Observation> findByStatusAndStartTimeAfter(ObservationStatus status, LocalDateTime time);
 }
