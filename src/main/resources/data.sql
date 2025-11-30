@@ -6,6 +6,10 @@ INSERT INTO roles (name, description) VALUES
                                           ('STUDENT', 'Студент - ограниченный доступ'),
                                           ('GUEST', 'Гость - минимальный доступ');
 
+insert into users (login, password_hash, full_name, email, phone, role_id, is_active)
+values ('ADMIN', '$2a$10$rx4VJi8eRqv5bkmW8dioi.qsYgU4Skcjfav/HcMC/GhR0n.dZ3eLm', 'ADMIN', 'admin@gmail.com', '89996667744', 3, true);
+
+
 -- Заполнение телескопов
 INSERT INTO telescopes (name, type, aperture, focal_length, location, status, max_resolution) VALUES
                                                                                                   ('БТА-1', 'OPTICAL', 6.00, 24000, '44.725°N, 41.025°E', 'AVAILABLE', '0.02 угл. сек.'),
