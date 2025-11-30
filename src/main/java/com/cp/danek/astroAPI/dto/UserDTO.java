@@ -1,18 +1,38 @@
 package com.cp.danek.astroAPI.dto;
 
 import com.cp.danek.astroAPI.model.enums.UserRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "DTO для представления пользователя системы")
 public class UserDTO {
+
+    @Schema(description = "Уникальный идентификатор пользователя", example = "1")
     private Long id;
+
+    @Schema(description = "Логин пользователя", example = "astronomer_ivanov")
     private String login;
+
+    @Schema(description = "Полное имя пользователя", example = "Иванов Иван Иванович")
     private String fullName;
+
+    @Schema(description = "Email пользователя", example = "ivanov@observatory.ru")
     private String email;
+
+    @Schema(description = "Телефон пользователя", example = "+7-999-123-45-67")
     private String phone;
+
+    @Schema(description = "Роль пользователя в системе")
     private UserRole role;
+
+    @Schema(description = "Дата и время создания учетной записи")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Дата и время последнего входа")
     private LocalDateTime lastLogin;
+
+    @Schema(description = "Статус активности учетной записи", example = "true")
     private Boolean isActive;
 
     // Конструкторы

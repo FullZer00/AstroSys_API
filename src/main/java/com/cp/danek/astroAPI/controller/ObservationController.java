@@ -1,6 +1,6 @@
 package com.cp.danek.astroAPI.controller;
 
-import com.cp.danek.astroAPI.dto.ApiResponse;
+import com.cp.danek.astroAPI.dto.ApiResponseDTO;
 import com.cp.danek.astroAPI.dto.CreateObservationDTO;
 import com.cp.danek.astroAPI.dto.ObservationDTO;
 import com.cp.danek.astroAPI.mapper.ModelMapper;
@@ -45,37 +45,37 @@ public class ObservationController {
 
     // GET /api/observations - получить все наблюдения
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getAllObservations() {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getAllObservations() {
         try {
             List<ObservationDTO> observations = observationService.getAllObservations().stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observations: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/{id} - получить наблюдение по ID
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ObservationDTO>> getObservationById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> getObservationById(@PathVariable Long id) {
         try {
             Observation observation = observationService.getObservationById(id)
                     .orElseThrow(() -> new RuntimeException("Observation not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Observation retrieved successfully", modelMapper.toObservationDTO(observation)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation retrieved successfully", modelMapper.toObservationDTO(observation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observation: " + e.getMessage()));
         }
     }
 
     // POST /api/observations - создать новое наблюдение
     @PostMapping
-    public ResponseEntity<ApiResponse<ObservationDTO>> createObservation(@RequestBody CreateObservationDTO request) {
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> createObservation(@RequestBody CreateObservationDTO request) {
         try {
             // Получаем связанные сущности
             Telescope telescope = telescopeService.getTelescopeById(request.getTelescopeId())
@@ -100,19 +100,19 @@ public class ObservationController {
 
             Observation createdObservation = observationService.createObservation(observation);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success("Observation created successfully", modelMapper.toObservationDTO(createdObservation)));
+                    .body(ApiResponseDTO.success("Observation created successfully", modelMapper.toObservationDTO(createdObservation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error creating observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error creating observation: " + e.getMessage()));
         }
     }
 
     // PUT /api/observations/{id} - обновить наблюдение
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ObservationDTO>> updateObservation(@PathVariable Long id, @RequestBody CreateObservationDTO request) {
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> updateObservation(@PathVariable Long id, @RequestBody CreateObservationDTO request) {
         try {
             Observation existingObservation = observationService.getObservationById(id)
                     .orElseThrow(() -> new RuntimeException("Observation not found with id: " + id));
@@ -124,104 +124,104 @@ public class ObservationController {
             existingObservation.setNotes(request.getNotes());
 
             Observation updatedObservation = observationService.updateObservation(id, existingObservation);
-            return ResponseEntity.ok(ApiResponse.success("Observation updated successfully", modelMapper.toObservationDTO(updatedObservation)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation updated successfully", modelMapper.toObservationDTO(updatedObservation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error updating observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error updating observation: " + e.getMessage()));
         }
     }
 
     // DELETE /api/observations/{id} - удалить наблюдение
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteObservation(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<Void>> deleteObservation(@PathVariable Long id) {
         try {
             observationService.deleteObservation(id);
-            return ResponseEntity.ok(ApiResponse.success("Observation deleted successfully", null));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation deleted successfully", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error deleting observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error deleting observation: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/astronomer/{astronomerId} - наблюдения астронома
     @GetMapping("/astronomer/{astronomerId}")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getObservationsByAstronomer(@PathVariable Long astronomerId) {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getObservationsByAstronomer(@PathVariable Long astronomerId) {
         try {
             List<ObservationDTO> observations = observationService.getObservationsByAstronomer(astronomerId).stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observations: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/telescope/{telescopeId} - наблюдения телескопа
     @GetMapping("/telescope/{telescopeId}")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getObservationsByTelescope(@PathVariable Long telescopeId) {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getObservationsByTelescope(@PathVariable Long telescopeId) {
         try {
             List<ObservationDTO> observations = observationService.getObservationsByTelescope(telescopeId).stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observations: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/object/{objectId} - наблюдения объекта
     @GetMapping("/object/{objectId}")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getObservationsByObject(@PathVariable Long objectId) {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getObservationsByObject(@PathVariable Long objectId) {
         try {
             List<ObservationDTO> observations = observationService.getObservationsByObject(objectId).stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observations: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/status/{status} - наблюдения по статусу
     @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getObservationsByStatus(@PathVariable ObservationStatus status) {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getObservationsByStatus(@PathVariable ObservationStatus status) {
         try {
             List<ObservationDTO> observations = observationService.getObservationsByStatus(status).stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving observations: " + e.getMessage()));
         }
     }
 
     // PATCH /api/observations/{id}/start - начать наблюдение
     @PatchMapping("/{id}/start")
-    public ResponseEntity<ApiResponse<ObservationDTO>> startObservation(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> startObservation(@PathVariable Long id) {
         try {
             observationService.startObservation(id);
             Observation observation = observationService.getObservationById(id)
                     .orElseThrow(() -> new RuntimeException("Observation not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Observation started successfully", modelMapper.toObservationDTO(observation)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation started successfully", modelMapper.toObservationDTO(observation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error starting observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error starting observation: " + e.getMessage()));
         }
     }
 
     // PATCH /api/observations/{id}/complete - завершить наблюдение
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<ApiResponse<ObservationDTO>> completeObservation(
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> completeObservation(
             @PathVariable Long id,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) String dataPath) {
@@ -229,58 +229,58 @@ public class ObservationController {
             observationService.completeObservation(id, notes, dataPath);
             Observation observation = observationService.getObservationById(id)
                     .orElseThrow(() -> new RuntimeException("Observation not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Observation completed successfully", modelMapper.toObservationDTO(observation)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation completed successfully", modelMapper.toObservationDTO(observation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error completing observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error completing observation: " + e.getMessage()));
         }
     }
 
     // PATCH /api/observations/{id}/cancel - отменить наблюдение
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<ObservationDTO>> cancelObservation(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<ObservationDTO>> cancelObservation(@PathVariable Long id) {
         try {
             observationService.cancelObservation(id);
             Observation observation = observationService.getObservationById(id)
                     .orElseThrow(() -> new RuntimeException("Observation not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Observation cancelled successfully", modelMapper.toObservationDTO(observation)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Observation cancelled successfully", modelMapper.toObservationDTO(observation)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error cancelling observation: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error cancelling observation: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/active - активные наблюдения
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getActiveObservations() {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getActiveObservations() {
         try {
             List<ObservationDTO> observations = observationService.getActiveObservations().stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Active observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Active observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving active observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving active observations: " + e.getMessage()));
         }
     }
 
     // GET /api/observations/upcoming - предстоящие наблюдения
     @GetMapping("/upcoming")
-    public ResponseEntity<ApiResponse<List<ObservationDTO>>> getUpcomingObservations() {
+    public ResponseEntity<ApiResponseDTO<List<ObservationDTO>>> getUpcomingObservations() {
         try {
             List<ObservationDTO> observations = observationService.getUpcomingObservations().stream()
                     .map(modelMapper::toObservationDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Upcoming observations retrieved successfully", observations));
+            return ResponseEntity.ok(ApiResponseDTO.success("Upcoming observations retrieved successfully", observations));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving upcoming observations: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving upcoming observations: " + e.getMessage()));
         }
     }
 }

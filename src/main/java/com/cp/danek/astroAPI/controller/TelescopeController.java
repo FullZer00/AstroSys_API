@@ -1,6 +1,6 @@
 package com.cp.danek.astroAPI.controller;
 
-import com.cp.danek.astroAPI.dto.ApiResponse;
+import com.cp.danek.astroAPI.dto.ApiResponseDTO;
 import com.cp.danek.astroAPI.dto.TelescopeDTO;
 import com.cp.danek.astroAPI.mapper.ModelMapper;
 import com.cp.danek.astroAPI.model.entities.Telescope;
@@ -29,64 +29,64 @@ public class TelescopeController {
 
     // GET /api/telescopes - получить все телескопы
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TelescopeDTO>>> getAllTelescopes() {
+    public ResponseEntity<ApiResponseDTO<List<TelescopeDTO>>> getAllTelescopes() {
         try {
             List<TelescopeDTO> telescopes = telescopeService.getAllTelescopes().stream()
                     .map(modelMapper::toTelescopeDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Telescopes retrieved successfully", telescopes));
+            return ResponseEntity.ok(ApiResponseDTO.success("Telescopes retrieved successfully", telescopes));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving telescopes: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving telescopes: " + e.getMessage()));
         }
     }
 
     // GET /api/telescopes/{id} - получить телескоп по ID
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<TelescopeDTO>> getTelescopeById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<TelescopeDTO>> getTelescopeById(@PathVariable Long id) {
         try {
             Telescope telescope = telescopeService.getTelescopeById(id)
                     .orElseThrow(() -> new RuntimeException("Telescope not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Telescope retrieved successfully", modelMapper.toTelescopeDTO(telescope)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Telescope retrieved successfully", modelMapper.toTelescopeDTO(telescope)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving telescope: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving telescope: " + e.getMessage()));
         }
     }
 
     // POST /api/telescopes - создать новый телескоп
     @PostMapping
-    public ResponseEntity<ApiResponse<TelescopeDTO>> createTelescope(@RequestBody TelescopeDTO telescopeDTO) {
+    public ResponseEntity<ApiResponseDTO<TelescopeDTO>> createTelescope(@RequestBody TelescopeDTO telescopeDTO) {
         try {
             Telescope telescope = modelMapper.toTelescopeEntity(telescopeDTO);
             Telescope createdTelescope = telescopeService.createTelescope(telescope);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success("Telescope created successfully", modelMapper.toTelescopeDTO(createdTelescope)));
+                    .body(ApiResponseDTO.success("Telescope created successfully", modelMapper.toTelescopeDTO(createdTelescope)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error creating telescope: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error creating telescope: " + e.getMessage()));
         }
     }
 
     // PUT /api/telescopes/{id} - обновить телескоп
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TelescopeDTO>> updateTelescope(@PathVariable Long id, @RequestBody TelescopeDTO telescopeDTO) {
+    public ResponseEntity<ApiResponseDTO<TelescopeDTO>> updateTelescope(@PathVariable Long id, @RequestBody TelescopeDTO telescopeDTO) {
         try {
             Telescope existingTelescope = telescopeService.getTelescopeById(id)
                     .orElseThrow(() -> new RuntimeException("Telescope not found with id: " + id));
 
             modelMapper.updateTelescopeFromDTO(existingTelescope, telescopeDTO);
             Telescope updatedTelescope = telescopeService.updateTelescope(id, existingTelescope);
-            return ResponseEntity.ok(ApiResponse.success("Telescope updated successfully", modelMapper.toTelescopeDTO(updatedTelescope)));
+            return ResponseEntity.ok(ApiResponseDTO.success("Telescope updated successfully", modelMapper.toTelescopeDTO(updatedTelescope)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error updating telescope: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error updating telescope: " + e.getMessage()));
         }
     }
 

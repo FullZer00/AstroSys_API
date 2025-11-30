@@ -1,6 +1,6 @@
 package com.cp.danek.astroAPI.controller;
 
-import com.cp.danek.astroAPI.dto.ApiResponse;
+import com.cp.danek.astroAPI.dto.ApiResponseDTO;
 import com.cp.danek.astroAPI.dto.AstronomicalObjectDTO;
 import com.cp.danek.astroAPI.model.entities.AstronomicalObject;
 import com.cp.danek.astroAPI.model.enums.AstronomicalObjectType;
@@ -30,164 +30,164 @@ public class AstronomicalObjectController {
 
     // GET /api/astronomical-objects - получить все объекты
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getAllObjects() {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getAllObjects() {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getAllObjects().stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Astronomical objects retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Astronomical objects retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving astronomical objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving astronomical objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/{id} - получить объект по ID
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AstronomicalObjectDTO>> getObjectById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<AstronomicalObjectDTO>> getObjectById(@PathVariable Long id) {
         try {
             AstronomicalObject object = astronomicalObjectService.getObjectById(id)
                     .orElseThrow(() -> new RuntimeException("Astronomical object not found with id: " + id));
-            return ResponseEntity.ok(ApiResponse.success("Astronomical object retrieved successfully",
+            return ResponseEntity.ok(ApiResponseDTO.success("Astronomical object retrieved successfully",
                     modelMapper.toAstronomicalObjectDTO(object)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving astronomical object: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving astronomical object: " + e.getMessage()));
         }
     }
 
     // POST /api/astronomical-objects - создать новый объект
     @PostMapping
-    public ResponseEntity<ApiResponse<AstronomicalObjectDTO>> createObject(@RequestBody AstronomicalObjectDTO objectDTO) {
+    public ResponseEntity<ApiResponseDTO<AstronomicalObjectDTO>> createObject(@RequestBody AstronomicalObjectDTO objectDTO) {
         try {
             AstronomicalObject object = modelMapper.toAstronomicalObjectEntity(objectDTO);
 
             AstronomicalObject createdObject = astronomicalObjectService.createObject(object);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success("Astronomical object created successfully",
+                    .body(ApiResponseDTO.success("Astronomical object created successfully",
                             modelMapper.toAstronomicalObjectDTO(createdObject)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error creating astronomical object: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error creating astronomical object: " + e.getMessage()));
         }
     }
 
     // PUT /api/astronomical-objects/{id} - обновить объект
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<AstronomicalObjectDTO>> updateObject(@PathVariable Long id, @RequestBody AstronomicalObjectDTO objectDTO) {
+    public ResponseEntity<ApiResponseDTO<AstronomicalObjectDTO>> updateObject(@PathVariable Long id, @RequestBody AstronomicalObjectDTO objectDTO) {
         try {
             AstronomicalObject object = modelMapper.toAstronomicalObjectEntity(objectDTO);
 
             AstronomicalObject updatedObject = astronomicalObjectService.updateObject(id, object);
-            return ResponseEntity.ok(ApiResponse.success("Astronomical object updated successfully",
+            return ResponseEntity.ok(ApiResponseDTO.success("Astronomical object updated successfully",
                     modelMapper.toAstronomicalObjectDTO(updatedObject)));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponseDTO.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error updating astronomical object: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error updating astronomical object: " + e.getMessage()));
         }
     }
 
     // DELETE /api/astronomical-objects/{id} - удалить объект
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteObject(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<Void>> deleteObject(@PathVariable Long id) {
         try {
             astronomicalObjectService.deleteObject(id);
-            return ResponseEntity.ok(ApiResponse.success("Astronomical object deleted successfully", null));
+            return ResponseEntity.ok(ApiResponseDTO.success("Astronomical object deleted successfully", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error deleting astronomical object: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error deleting astronomical object: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/search?name={name} - поиск объектов по названию
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> searchObjectsByName(@RequestParam String name) {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> searchObjectsByName(@RequestParam String name) {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.searchObjectsByName(name).stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Objects found successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Objects found successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error searching objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error searching objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/type/{type} - получить объекты по типу
     @GetMapping("/type/{type}")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getObjectsByType(@PathVariable AstronomicalObjectType type) {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getObjectsByType(@PathVariable AstronomicalObjectType type) {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getObjectsByType(type).stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Objects retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Objects retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/constellation/{constellation} - получить объекты по созвездию
     @GetMapping("/constellation/{constellation}")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getObjectsByConstellation(@PathVariable String constellation) {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getObjectsByConstellation(@PathVariable String constellation) {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getObjectsByConstellation(constellation).stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Objects retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Objects retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/bright/{maxMagnitude} - получить яркие объекты
     @GetMapping("/bright/{maxMagnitude}")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getBrightObjects(@PathVariable Double maxMagnitude) {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getBrightObjects(@PathVariable Double maxMagnitude) {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getBrightObjects(maxMagnitude).stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Bright objects retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Bright objects retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving bright objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving bright objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/distance-range - объекты в диапазоне расстояний
     @GetMapping("/distance-range")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getObjectsInDistanceRange(
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getObjectsInDistanceRange(
             @RequestParam Double minDistance,
             @RequestParam Double maxDistance) {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getObjectsInDistanceRange(minDistance, maxDistance).stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Objects in distance range retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Objects in distance range retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving objects: " + e.getMessage()));
         }
     }
 
     // GET /api/astronomical-objects/popular - популярные объекты
     @GetMapping("/popular")
-    public ResponseEntity<ApiResponse<List<AstronomicalObjectDTO>>> getPopularObjects() {
+    public ResponseEntity<ApiResponseDTO<List<AstronomicalObjectDTO>>> getPopularObjects() {
         try {
             List<AstronomicalObjectDTO> objects = astronomicalObjectService.getPopularObjects().stream()
                     .map(modelMapper::toAstronomicalObjectDTO)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(ApiResponse.success("Popular objects retrieved successfully", objects));
+            return ResponseEntity.ok(ApiResponseDTO.success("Popular objects retrieved successfully", objects));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error retrieving popular objects: " + e.getMessage()));
+                    .body(ApiResponseDTO.error("Error retrieving popular objects: " + e.getMessage()));
         }
     }
 }
