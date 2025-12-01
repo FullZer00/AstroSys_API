@@ -10,6 +10,7 @@ import com.cp.danek.astroAPI.model.enums.DataQuality;
 import com.cp.danek.astroAPI.model.enums.ProcessingStatus;
 import com.cp.danek.astroAPI.service.ObservationDataService;
 import com.cp.danek.astroAPI.service.ObservationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/observation-data")
 @CrossOrigin(origins = "*")
+@Tag(name = "Данные обсерваторий", description = "API для управления данными обсерваторий")
 public class ObservationDataController {
 
     private final ObservationDataService observationDataService;

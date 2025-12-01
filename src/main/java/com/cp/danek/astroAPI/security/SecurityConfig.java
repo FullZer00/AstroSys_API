@@ -27,11 +27,18 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthEntryPointJwt unauthorizedHandler;
+    private final AccessDeniedHandlerJwt accessDeniedHandler;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtTokenProvider jwtTokenProvider) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService,
+                          JwtTokenProvider jwtTokenProvider,
+                          AuthEntryPointJwt unauthorizedHandler,
+                          AccessDeniedHandlerJwt accessDeniedHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -59,19 +66,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Исправлено
+                // Настройка CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // Отключение CSRF - ИСПРАВЛЕНО (используем лямбду)
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // Обработка исключений
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+
+                // Настройка сессий (без состояния)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Настройка авторизации запросов
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
-                        .requestMatchers("/api/users/create").permitAll()
-                        .requestMatchers("/api/test/**").permitAll()
+                        // Публичные endpoints (без аутентификации)
+                        .requestMatchers(
+                                "/api/auth/**",            // Аутентификация
+                                "/api/users/create",       // Регистрация
+                                "/api/test/**",           // Тестовые endpoints
+                                "/swagger-ui/**",         // Swagger UI
+                                "/swagger-ui.html",       // Swagger UI HTML
+                                "/v3/api-docs/**",        // OpenAPI JSON
+                                "/api-docs/**"            // Документация
+                        ).permitAll()
+                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 );
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        // Добавляем JWT фильтр перед стандартным фильтром аутентификации
+        http.addFilterAfter(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -79,10 +106,37 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*")); // Используем patterns вместо origins
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+
+        // Разрешаем все origins (для разработки)
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        // Разрешаемые HTTP методы
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"
+        ));
+
+        // Разрешаемые заголовки
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
+
+        // Разрешаем credentials (куки, авторизация)
         configuration.setAllowCredentials(true);
+
+        // Время кэширования CORS префлайт запросов
+        configuration.setMaxAge(3600L);
+
+        // Экспортируемые заголовки
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Disposition"
+        ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

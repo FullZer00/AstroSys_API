@@ -26,6 +26,19 @@ public class ModelMapper {
         );
     }
 
+    public User toUserEntity(RegistrationRequestDTO request) {
+        if (request == null) {
+            return null;
+        }
+
+        User user = new User();
+        user.setLogin(request.getLogin());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+
+        return user;
+    }
+
     public User toUserEntity(CreateUserDTO request) {
         if (request == null) {
             return null;
@@ -33,7 +46,6 @@ public class ModelMapper {
 
         User user = new User();
         user.setLogin(request.getLogin());
-        user.setPasswordHash(request.getPassword()); // В реальном приложении нужно хэшировать!
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());

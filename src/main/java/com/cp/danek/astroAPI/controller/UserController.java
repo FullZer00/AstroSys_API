@@ -27,7 +27,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Пользователи", description = "API для управления пользователями системы")
+@ApiResponse(responseCode = "403", description = "Ошибка аутентификации")
 public class UserController {
 
     private final UserService userService;
@@ -75,6 +77,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<UserDTO>> getUserById(@PathVariable Long id) {
         try {
@@ -100,6 +103,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Пользователь с указанным логином не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('ADMIN') or #login == authentication.principal.login")
     @GetMapping("/login/{login}")
     public ResponseEntity<ApiResponseDTO<UserDTO>> getUserByLogin(@PathVariable String login) {
         try {
@@ -158,6 +162,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Некорректные данные пользователя"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<UserDTO>> updateUser(@PathVariable Long id, @RequestBody CreateUserDTO request) {
         try {
@@ -265,7 +270,6 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @GetMapping("/astronomers/active")
-
     public ResponseEntity<ApiResponseDTO<List<UserDTO>>> getActiveAstronomers() {
         try {
             List<UserDTO> astronomers = userService.getActiveAstronomers().stream()

@@ -12,9 +12,11 @@ import com.cp.danek.astroAPI.service.MaintenanceService;
 import com.cp.danek.astroAPI.service.TelescopeService;
 import com.cp.danek.astroAPI.service.UserService;
 import com.cp.danek.astroAPI.mapper.ModelMapper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/maintenances")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER')")
+@Tag(name="Обслуживание", description = "API для управления обслуживания оборудований")
 public class MaintenanceController {
 
     private final MaintenanceService maintenanceService;

@@ -13,9 +13,11 @@ import com.cp.danek.astroAPI.service.AstronomicalObjectService;
 import com.cp.danek.astroAPI.service.ObservationService;
 import com.cp.danek.astroAPI.service.TelescopeService;
 import com.cp.danek.astroAPI.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/observations")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasAnyRole('ADMIN', 'ASTRONOMER')")
+@Tag(name = "Обсерватории", description = "API для управления обсерваториями")
 public class ObservationController {
 
     private final ObservationService observationService;

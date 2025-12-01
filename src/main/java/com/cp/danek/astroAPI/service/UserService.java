@@ -1,10 +1,14 @@
 package com.cp.danek.astroAPI.service;
 
+import com.cp.danek.astroAPI.dto.RegistrationRequestDTO;
+import com.cp.danek.astroAPI.mapper.ModelMapper;
+import com.cp.danek.astroAPI.model.entities.Role;
 import com.cp.danek.astroAPI.model.entities.User;
 import com.cp.danek.astroAPI.model.enums.UserRole;
 import com.cp.danek.astroAPI.model.repositories.UserRepository;
 import com.cp.danek.astroAPI.model.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +21,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ModelMapper modelMapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository,
+                       ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.modelMapper = modelMapper;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     // Основные CRUD операции

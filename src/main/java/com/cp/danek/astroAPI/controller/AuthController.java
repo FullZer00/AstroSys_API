@@ -1,22 +1,20 @@
 package com.cp.danek.astroAPI.controller;
 
-import com.cp.danek.astroAPI.dto.ApiResponseDTO;
-import com.cp.danek.astroAPI.dto.LoginRequestDTO;
-import com.cp.danek.astroAPI.dto.JwtResponseDTO;
-import com.cp.danek.astroAPI.security.JwtTokenProvider;
+import com.cp.danek.astroAPI.dto.*;
+import com.cp.danek.astroAPI.mapper.ModelMapper;
 import com.cp.danek.astroAPI.security.UserDetailsImpl;
+import com.cp.danek.astroAPI.service.AuthService;
+import com.cp.danek.astroAPI.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -24,16 +22,39 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
-@Tag(name = "Аутентификация", description = "API для аутентификации и получения JWT токенов")
+@Tag(name = "Аутентификация", description = "API для аутентификации и регистрации")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthService authService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @Operation(
+            summary = "Регистрация пользователя",
+            description = "Выполняет регистрацию пользователя"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Успешная регистрация",
+                    content = @Content(schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Неверные учетные данные"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные запроса")
+    })
+    @PostMapping("/reg")
+    public ResponseEntity<ApiResponseDTO<UserDTO>> register(@Valid @RequestBody RegistrationRequestDTO regRequestDTO) {
+        try {
+            UserDTO createdUser = authService.register(regRequestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponseDTO.success("User registration successfully",createdUser));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponseDTO.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponseDTO.error("Registration error: " + e.getMessage()));
+        }
     }
 
     @Operation(
@@ -56,29 +77,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDTO loginRequest) {
 
         try {
-            // Аутентификация пользователя
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getLogin(),
-                            loginRequest.getPassword()
-                    )
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Генерация JWT токена
-            String jwt = jwtTokenProvider.generateJwtToken(authentication);
-
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            String role = userDetails.getAuthorities().iterator().next().getAuthority()
-                    .replace("ROLE_", ""); // Убираем префикс ROLE_
-
-            JwtResponseDTO jwtResponse = new JwtResponseDTO(
-                    jwt,
-                    userDetails.getId(),
-                    userDetails.getUsername(),
-                    role
-            );
+            JwtResponseDTO jwtResponse = authService.authenticate(loginRequest);
 
             return ResponseEntity.ok(ApiResponseDTO.success("User authenticated successfully", jwtResponse));
 

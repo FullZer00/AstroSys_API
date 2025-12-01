@@ -5,9 +5,11 @@ import com.cp.danek.astroAPI.dto.TelescopeDTO;
 import com.cp.danek.astroAPI.mapper.ModelMapper;
 import com.cp.danek.astroAPI.model.entities.Telescope;
 import com.cp.danek.astroAPI.service.TelescopeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/telescopes")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasRole('ENGINEER')")
+@Tag(name = "Телескопы", description = "API для управления телескопами")
 public class TelescopeController {
 
     private final TelescopeService telescopeService;
